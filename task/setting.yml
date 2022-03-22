@@ -1,0 +1,38 @@
+---
+- hosts: vyos
+  gather_facts: false
+
+  tasks:
+    - name: configuration
+      vyos_config:
+        lines:
+          # ntp,timezone,dns
+          - set system ntp server 'ntp.nict.jp'
+          - set system time-zone 'Asia/Tokyo'
+          - set system name-server '192.168.3.1'
+
+          # eth1 ip
+          - set interfaces ethernet eth1 address '192.168.4.254/24'
+          - set protocols static route 0.0.0.0/0 next-hop 192.168.3.1
+
+          # DHCP setting
+          - set service dhcp-server shared-network-name local
+          - set service dhcp-server shared-network-name local subnet 192.168.4.0/24 default-router 192.168.4.254
+          - set service dhcp-server shared-network-name local subnet 192.168.4.0/24 name-server 192.168.4.254
+          - set service dhcp-server shared-network-name local subnet 192.168.4.0/24 range 0 start 192.168.4.2
+          - set service dhcp-server shared-network-name local subnet 192.168.4.0/24 range 0 stop 192.168.4.253
+
+          # DNS setting
+          - set service dns forwarding name-server 192.168.3.1
+          - set service dns forwarding listen-address 192.168.4.1
+          - set service dns forwarding allow-from 192.168.4.0/24
+
+          # NAT
+          - set nat source rule 100 outbound-interface eth0
+          - set nat source rule 100 source address 0.0.0.0/0
+          - set nat source rule 100 translation address 'masquerade'
+          - set nat destination rule 200 destination port '10022'
+          - set nat destination rule 200 inbound-interface 'eth0'
+          - set nat destination rule 200 protocol 'tcp'
+          - set nat destination rule 200 translation address '192.168.4.2'
+          - set nat destination rule 200 translation port '22'

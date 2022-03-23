@@ -24,7 +24,7 @@
 
           # DNS setting
           - set service dns forwarding name-server 192.168.3.1
-          - set service dns forwarding listen-address 192.168.4.1
+          - set service dns forwarding listen-address 192.168.4.254
           - set service dns forwarding allow-from 192.168.4.0/24
 
           # NAT
